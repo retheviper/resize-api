@@ -1,10 +1,10 @@
-## Image resize API
+# Image resize API
 
-### TL;DR
+## TL;DR
 
 A simple API that just resizes images and returns as webp.
 
-### Description
+## Description
 
 Actix-web based API that resizes images.
 Using the `image` crate, the API downloads the image from the provided URL, resizes it to the specified width, and returns the resized image.
@@ -25,7 +25,7 @@ Set `.env` file with the following environment variables:
 
 Or any other format will be just returned as is.
 
-### How to run
+## How to run
 
 1. Clone the repository
 2. Run `cargo run` in the root directory
