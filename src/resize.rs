@@ -9,7 +9,7 @@ use log::{error, info, warn};
 use reqwest::Client;
 
 use crate::config::RESIZE_IMAGE_EXTENSIONS;
-use crate::validate::{validate_image_url, validate_origin, validate_width};
+use crate::validate::{UrlType, validate_image_url, validate_origin, validate_width};
 
 pub(crate) async fn resize_image(req: HttpRequest, query: web::Query<HashMap<String, String>>) -> impl Responder {
     let validate = validate_origin(req);
@@ -20,7 +20,11 @@ pub(crate) async fn resize_image(req: HttpRequest, query: web::Query<HashMap<Str
     let start = Instant::now();
     let image_url = match query.get("image_url") {
         Some(url) => match validate_image_url(url) {
-            Ok(_) => format!("{}{}", *crate::config::MOUNT_PATH, url),
+            Ok(url_type) =>
+                match url_type {
+                    UrlType::Http => url.to_string(),
+                    UrlType::Local => format!("{}{}", *crate::config::MOUNT_PATH, url),
+                }
             Err(e) => return HttpResponse::BadRequest().body(e),
         },
         None => return HttpResponse::BadRequest().body("image_url is required"),
@@ -28,7 +32,7 @@ pub(crate) async fn resize_image(req: HttpRequest, query: web::Query<HashMap<Str
 
     let width: u32 = match query.get("width") {
         Some(w) => match validate_width(w) {
-            Ok(_) => w.parse().unwrap(),
+            Ok(w) => w,
             Err(e) => return HttpResponse::BadRequest().body(e),
         }
         None => return HttpResponse::BadRequest().body("width is required"),
